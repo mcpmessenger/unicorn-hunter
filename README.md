@@ -16,17 +16,32 @@ Unicorn Hunter analyzes GitHub repositories using codebase metrics (stars, forks
 
 - 🎯 **Flexible Input** - Accepts both GitHub URLs (`https://github.com/owner/repo`) and owner/repo format (`owner/repo`)
 - 📊 **Comprehensive Analysis** - Detailed metrics and component score breakdowns
+- 🔍 **Codebase Analysis** - Deep code quality, test coverage, security, and architecture analysis (when requested)
 - 💬 **Natural Language Insights** - AI-powered interpretation of results
 - 🎨 **Beautiful UI** - Modern design with dark/light theme support
 - ⚡ **Fast Analysis** - Real-time repository analysis via MCP backend
 
 ## Important Disclaimer
 
-**This analysis is based solely on codebase metrics and does NOT consider:**
+**This analysis is based solely on GitHub activity metrics and does NOT consider:**
+- Actual codebase content or code quality
+- Code complexity or architecture
+- Test coverage or documentation quality
 - Daily Active Users (DAU)
 - Revenue or business metrics
 - User engagement data
 - Market conditions
+
+**What is analyzed:**
+- GitHub metrics (stars, forks, watchers, issues)
+- Development activity (commits, contributors, commit frequency)
+- Repository metadata (language, age, description)
+- **Codebase Analysis** (when requested with keywords like "codebase", "deep", or "code"):
+  - Code complexity and quality scores
+  - Test coverage analysis
+  - Dependency and security scanning
+  - Architecture and design patterns
+  - Documentation quality
 
 **Valuations are capped at $1 billion (unicorn status)** and are purely speculative estimates based on GitHub activity patterns. These should not be considered financial advice.
 

@@ -25,6 +25,35 @@ export interface AnalysisResult {
     valuationNote?: string
     factorsConsidered?: string[]
   }
+  codebaseAnalysis?: {
+    codeComplexity?: {
+      averageCyclomaticComplexity?: number
+      maxCyclomaticComplexity?: number
+      duplicationPercentage?: number
+    }
+    qualityScores?: {
+      maintainabilityIndex?: number
+      technicalDebtRatio?: number
+      codeSmellDensity?: number
+    }
+    testCoverage?: {
+      overallCoverage?: number
+      unitTestCoverage?: number
+    }
+    dependencies?: {
+      totalDependencies?: number
+      outdatedCount?: number
+      securityVulnerabilities?: number
+    }
+    architecture?: {
+      modularityScore?: number
+      couplingScore?: number
+    }
+    documentation?: {
+      readmeQualityScore?: number
+      commentCoverage?: number
+    }
+  }
 }
 
 export async function analyzeRepository(repoName: string): Promise<AnalysisResult> {
@@ -177,6 +206,9 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
     // Extract interpretation (natural language explanations)
     const interpretation = unicornResult.interpretation || {}
     
+    // Extract codebase analysis if available
+    const codebaseAnalysis = unicornResult.codebase_analysis || {}
+    
     // Map the response to our expected format
     return {
       score: unicornResult.unicorn_score || 0,
@@ -199,6 +231,14 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
         valuationNote: interpretation.valuation_note,
         factorsConsidered: interpretation.factors_considered || [],
       },
+      codebaseAnalysis: codebaseAnalysis ? {
+        codeComplexity: codebaseAnalysis.code_complexity,
+        qualityScores: codebaseAnalysis.quality_scores,
+        testCoverage: codebaseAnalysis.test_coverage,
+        dependencies: codebaseAnalysis.dependencies,
+        architecture: codebaseAnalysis.architecture,
+        documentation: codebaseAnalysis.documentation,
+      } : undefined,
     }
   } catch (error) {
     console.error("[Unicorn Hunter] Failed to analyze repository:", error)

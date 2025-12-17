@@ -8,6 +8,7 @@ import { ValuationCards } from "@/components/valuation-cards"
 import { ComponentScores } from "@/components/component-scores"
 import { RepoMetrics } from "@/components/repo-metrics"
 import { InterpretationDisplay } from "@/components/interpretation-display"
+import { CodebaseAnalysis } from "@/components/codebase-analysis"
 import GenerativeMountainScene from "@/components/ui/mountain-scene"
 import { Button } from "@/components/ui/button"
 import { analyzeRepository, type AnalysisResult } from "./actions"
@@ -140,6 +141,11 @@ export default function Home() {
                     valuationNote={analysisData.interpretation.valuationNote}
                     factorsConsidered={analysisData.interpretation.factorsConsidered}
                   />
+                )}
+
+                {/* Codebase Analysis */}
+                {analysisData.codebaseAnalysis && (
+                  <CodebaseAnalysis codebaseAnalysis={analysisData.codebaseAnalysis} />
                 )}
 
                 {/* Bottom Grid */}
