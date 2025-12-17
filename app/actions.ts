@@ -56,9 +56,9 @@ export interface AnalysisResult {
   }
 }
 
-export async function analyzeRepository(repoName: string): Promise<AnalysisResult> {
+export async function analyzeRepository(repoName: string, includeCodebaseAnalysis: boolean = false): Promise<AnalysisResult> {
   try {
-    console.log("[Unicorn Hunter] Analyzing repository:", repoName)
+    console.log("[Unicorn Hunter] Analyzing repository:", repoName, "with codebase analysis:", includeCodebaseAnalysis)
 
     const baseUrl = "https://valuation-mcp-server-554655392699.us-central1.run.app"
 
@@ -82,6 +82,107 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
       }
       owner = parts[0]
       repo = parts[1]
+    }
+
+    // If codebase analysis is requested, use agent_executor which handles it automatically
+    if (includeCodebaseAnalysis) {
+      console.log("[Unicorn Hunter] Using agent_executor for codebase analysis...")
+      const agentResponse = await fetch(`${baseUrl}/mcp/invoke`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tool: "agent_executor",
+          arguments: {
+            input: `what's the unicorn score for ${owner}/${repo} with codebase analysis?`,
+          },
+        }),
+      })
+
+      if (!agentResponse.ok) {
+        const errorText = await agentResponse.text()
+        throw new Error(`Failed to analyze repository: ${agentResponse.status} - ${errorText}`)
+      }
+
+      const agentData = await agentResponse.json()
+      let agentResult
+      if (agentData.content && Array.isArray(agentData.content) && agentData.content.length > 0) {
+        const textItem = agentData.content.find((item: any) => item.type === "text")
+        if (textItem && textItem.text) {
+          try {
+            agentResult = JSON.parse(textItem.text)
+          } catch (e) {
+            console.error("[Unicorn Hunter] Failed to parse agent response:", e)
+            throw new Error("Failed to parse analysis data")
+          }
+        }
+      }
+
+      // Extract data from agent result
+      const repoData = agentResult.repo_data || {}
+      const metrics = repoData.metrics || {}
+      const codebaseAnalysis = agentResult.codebase_analysis || {}
+      const componentScoresObj = agentResult.component_scores || {}
+      const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => ({
+        name: name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+        score: typeof score === "number" ? score : 0,
+        weight: 1,
+      }))
+      const valuationRanges = agentResult.speculative_valuation_ranges || {}
+      const interpretation = agentResult.interpretation || {}
+
+      return {
+        score: agentResult.unicorn_score || 0,
+        status: agentResult.status || getStatusFromScore(agentResult.unicorn_score || 0),
+        valuations: {
+          conservative: formatValuation(valuationRanges.conservative),
+          realistic: formatValuation(valuationRanges.realistic),
+          optimistic: formatValuation(valuationRanges.optimistic),
+        },
+        componentScores: componentScores,
+        metrics: {
+          stars: metrics.stars || 0,
+          forks: metrics.forks || 0,
+          watchers: metrics.watchers || 0,
+          contributors: repoData.development?.contributors || 0,
+          language: repoData.basic_info?.primary_language || "Unknown",
+        },
+        interpretation: {
+          scoreMeaning: interpretation.score_meaning,
+          valuationNote: interpretation.valuation_note,
+          factorsConsidered: interpretation.factors_considered || [],
+        },
+        codebaseAnalysis: codebaseAnalysis && Object.keys(codebaseAnalysis).length > 0 ? {
+          codeComplexity: codebaseAnalysis.code_complexity ? {
+            averageCyclomaticComplexity: codebaseAnalysis.code_complexity.average_cyclomatic_complexity,
+            maxCyclomaticComplexity: codebaseAnalysis.code_complexity.max_cyclomatic_complexity,
+            duplicationPercentage: codebaseAnalysis.code_complexity.duplication_percentage,
+          } : undefined,
+          qualityScores: codebaseAnalysis.quality_scores ? {
+            maintainabilityIndex: codebaseAnalysis.quality_scores.maintainability_index,
+            technicalDebtRatio: codebaseAnalysis.quality_scores.technical_debt_ratio,
+            codeSmellDensity: codebaseAnalysis.quality_scores.code_smell_density,
+          } : undefined,
+          testCoverage: codebaseAnalysis.test_coverage ? {
+            overallCoverage: codebaseAnalysis.test_coverage.overall_coverage,
+            unitTestCoverage: codebaseAnalysis.test_coverage.unit_test_coverage,
+          } : undefined,
+          dependencies: codebaseAnalysis.dependencies ? {
+            totalDependencies: codebaseAnalysis.dependencies.total_dependencies,
+            outdatedCount: codebaseAnalysis.dependencies.outdated_count,
+            securityVulnerabilities: codebaseAnalysis.dependencies.security_vulnerabilities,
+          } : undefined,
+          architecture: codebaseAnalysis.architecture ? {
+            modularityScore: codebaseAnalysis.architecture.modularity_score,
+            couplingScore: codebaseAnalysis.architecture.coupling_score,
+          } : undefined,
+          documentation: codebaseAnalysis.documentation ? {
+            readmeQualityScore: codebaseAnalysis.documentation.readme_quality_score,
+            commentCoverage: codebaseAnalysis.documentation.comment_coverage,
+          } : undefined,
+        } : undefined,
+      }
     }
 
     // Step 1: Analyze the repository to get repo_data
@@ -231,13 +332,34 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
         valuationNote: interpretation.valuation_note,
         factorsConsidered: interpretation.factors_considered || [],
       },
-      codebaseAnalysis: codebaseAnalysis ? {
-        codeComplexity: codebaseAnalysis.code_complexity,
-        qualityScores: codebaseAnalysis.quality_scores,
-        testCoverage: codebaseAnalysis.test_coverage,
-        dependencies: codebaseAnalysis.dependencies,
-        architecture: codebaseAnalysis.architecture,
-        documentation: codebaseAnalysis.documentation,
+      codebaseAnalysis: codebaseAnalysis && Object.keys(codebaseAnalysis).length > 0 ? {
+        codeComplexity: codebaseAnalysis.code_complexity ? {
+          averageCyclomaticComplexity: codebaseAnalysis.code_complexity.average_cyclomatic_complexity,
+          maxCyclomaticComplexity: codebaseAnalysis.code_complexity.max_cyclomatic_complexity,
+          duplicationPercentage: codebaseAnalysis.code_complexity.duplication_percentage,
+        } : undefined,
+        qualityScores: codebaseAnalysis.quality_scores ? {
+          maintainabilityIndex: codebaseAnalysis.quality_scores.maintainability_index,
+          technicalDebtRatio: codebaseAnalysis.quality_scores.technical_debt_ratio,
+          codeSmellDensity: codebaseAnalysis.quality_scores.code_smell_density,
+        } : undefined,
+        testCoverage: codebaseAnalysis.test_coverage ? {
+          overallCoverage: codebaseAnalysis.test_coverage.overall_coverage,
+          unitTestCoverage: codebaseAnalysis.test_coverage.unit_test_coverage,
+        } : undefined,
+        dependencies: codebaseAnalysis.dependencies ? {
+          totalDependencies: codebaseAnalysis.dependencies.total_dependencies,
+          outdatedCount: codebaseAnalysis.dependencies.outdated_count,
+          securityVulnerabilities: codebaseAnalysis.dependencies.security_vulnerabilities,
+        } : undefined,
+        architecture: codebaseAnalysis.architecture ? {
+          modularityScore: codebaseAnalysis.architecture.modularity_score,
+          couplingScore: codebaseAnalysis.architecture.coupling_score,
+        } : undefined,
+        documentation: codebaseAnalysis.documentation ? {
+          readmeQualityScore: codebaseAnalysis.documentation.readme_quality_score,
+          commentCoverage: codebaseAnalysis.documentation.comment_coverage,
+        } : undefined,
       } : undefined,
     }
   } catch (error) {
