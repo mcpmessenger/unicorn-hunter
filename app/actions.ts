@@ -181,7 +181,7 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       const codebaseScoreKeys = ['code_quality', 'maintainability', 'test_reliability', 'security_posture']
       const foundCodebaseScores = codebaseScoreKeys.filter(key => key in componentScoresObj)
       const missingCodebaseScores = codebaseScoreKeys.filter(key => !(key in componentScoresObj))
-      console.log("[Unicorn Hunter] Found codebase scores:", foundCodebaseScores.map(k => `${k}=${componentScoresObj[k]}`))
+      console.log("[Unicorn Hunter] Found codebase scores:", foundCodebaseScores.map(k => `${k}=${(componentScoresObj as any)[k]}`))
       if (missingCodebaseScores.length > 0) {
         console.warn("[Unicorn Hunter] Missing codebase scores:", missingCodebaseScores)
       }
