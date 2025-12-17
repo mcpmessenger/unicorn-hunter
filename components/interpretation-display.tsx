@@ -26,6 +26,7 @@ export function InterpretationDisplay({
             <div className="flex-1">
               <h3 className="font-semibold mb-2 text-primary">Score Interpretation</h3>
               <p className="text-foreground/90 leading-relaxed">
+                {/* TODO: Remove workaround once backend fixes interpretation text to match actual valuations */}
                 {scoreMeaning?.replace(/\$1[bB]\+?\s*potential/gi, "exceptional potential") || scoreMeaning}
               </p>
               <p className="text-xs text-muted-foreground mt-2 italic">
