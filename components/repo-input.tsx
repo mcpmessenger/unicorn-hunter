@@ -15,7 +15,7 @@ interface RepoInputProps {
 export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
   const [repo, setRepo] = useState("")
   const [error, setError] = useState("")
-  const [includeCodebaseAnalysis, setIncludeCodebaseAnalysis] = useState(false)
+  const [includeCodebaseAnalysis, setIncludeCodebaseAnalysis] = useState(true)
 
   const normalizeRepo = (input: string): string | null => {
     const trimmed = input.trim()
@@ -77,7 +77,7 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
                 disabled={isLoading}
                 className="w-4 h-4 rounded border-primary"
               />
-              <span className="text-muted-foreground">Deep Analysis</span>
+              <span className="text-muted-foreground">Deep Analysis (Default)</span>
             </label>
           </div>
         </div>

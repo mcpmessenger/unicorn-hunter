@@ -20,7 +20,7 @@ export default function Home() {
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handleAnalyze = async (repo: string, includeCodebaseAnalysis: boolean = false) => {
+  const handleAnalyze = async (repo: string, includeCodebaseAnalysis: boolean = true) => {
     setIsLoading(true)
     setRepoName(repo)
     setError(null)

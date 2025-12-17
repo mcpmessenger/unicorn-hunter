@@ -56,7 +56,7 @@ export interface AnalysisResult {
   }
 }
 
-export async function analyzeRepository(repoName: string, includeCodebaseAnalysis: boolean = false): Promise<AnalysisResult> {
+export async function analyzeRepository(repoName: string, includeCodebaseAnalysis: boolean = true): Promise<AnalysisResult> {
   try {
     console.log("[Unicorn Hunter] Analyzing repository:", repoName, "with codebase analysis:", includeCodebaseAnalysis)
 
