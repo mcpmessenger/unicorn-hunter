@@ -112,11 +112,16 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
         if (textItem && textItem.text) {
           try {
             agentResult = JSON.parse(textItem.text)
+            console.log("[Unicorn Hunter] Agent result keys:", Object.keys(agentResult))
           } catch (e) {
             console.error("[Unicorn Hunter] Failed to parse agent response:", e)
             throw new Error("Failed to parse analysis data")
           }
         }
+      }
+
+      if (!agentResult) {
+        throw new Error("No data received from agent executor")
       }
 
       // Extract data from agent result
@@ -126,11 +131,19 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       const unicornHunter = agentResult.unicorn_hunter || {}
       const codebaseAnalysis = unicornHunter.codebase_analysis || agentResult.codebase_analysis || {}
       
+      console.log("[Unicorn Hunter] Has unicorn_hunter:", !!agentResult.unicorn_hunter)
+      console.log("[Unicorn Hunter] unicorn_hunter keys:", Object.keys(unicornHunter))
+      
       // Component scores are in unicorn_hunter.component_scores
       // Fallback to top-level component_scores if not in unicorn_hunter
       const componentScoresObj = unicornHunter.component_scores || agentResult.component_scores || {}
       console.log("[Unicorn Hunter] Component scores found:", Object.keys(componentScoresObj).length, "scores")
-      console.log("[Unicorn Hunter] Component scores:", componentScoresObj)
+      console.log("[Unicorn Hunter] Component scores raw:", JSON.stringify(componentScoresObj))
+      
+      // Verify we have the codebase analysis scores
+      const codebaseScoreKeys = ['code_quality', 'maintainability', 'test_reliability', 'security_posture']
+      const hasCodebaseScores = codebaseScoreKeys.some(key => key in componentScoresObj)
+      console.log("[Unicorn Hunter] Has codebase scores:", hasCodebaseScores)
       
       const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => {
         const formattedName = name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
