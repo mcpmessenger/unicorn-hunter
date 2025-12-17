@@ -73,7 +73,7 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
   try {
     console.log("[Unicorn Hunter] Analyzing repository:", repoName, "with codebase analysis:", includeCodebaseAnalysis)
 
-    const baseUrl = "https://valuation-mcp-server-554655392699.us-central1.run.app"
+    const baseUrl = "https://valuation-mcp-server-lwo3sf5jba-uc.a.run.app"
 
     // Parse owner and repo - handle both "owner/repo" and GitHub URLs
     let owner: string
