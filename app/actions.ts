@@ -25,6 +25,19 @@ export interface AnalysisResult {
     valuationNote?: string
     factorsConsidered?: string[]
   }
+  packageStats?: {
+    status: string
+    packageManager?: string
+    packageName?: string
+    stats?: {
+      weeklyDownloads?: number
+      monthlyDownloads?: number
+      latestVersion?: string
+      totalVersions?: number
+    }
+  }
+  ecosystemAdoptionScore?: number
+  summary?: string
   codebaseAnalysis?: {
     codeComplexity?: {
       averageCyclomaticComplexity?: number
@@ -128,6 +141,8 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
         hasAnalysis: !!agentResult.analysis,
         hasUnicornHunter: !!agentResult.unicorn_hunter,
         hasCodebaseAnalysis: !!agentResult.codebase_analysis,
+        hasPackageStats: !!agentResult.package_stats,
+        hasEcosystemAdoptionScore: agentResult.ecosystem_adoption_score !== undefined,
         topLevelKeys: Object.keys(agentResult),
       })
 
@@ -189,6 +204,11 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       
       const valuationRanges = unicornHunter.speculative_valuation_ranges || {}
       const interpretation = unicornHunter.interpretation || {}
+      
+      // Extract package stats
+      const packageStats = agentResult.package_stats || null
+      const ecosystemAdoptionScore = agentResult.ecosystem_adoption_score
+      const summary = agentResult.summary
 
       return {
         score: unicornHunter.unicorn_score || 0,
@@ -211,6 +231,19 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
           valuationNote: interpretation.valuation_note,
           factorsConsidered: interpretation.factors_considered || [],
         },
+        packageStats: packageStats ? {
+          status: packageStats.status || "unknown",
+          packageManager: packageStats.package_manager,
+          packageName: packageStats.package_name,
+          stats: packageStats.stats ? {
+            weeklyDownloads: packageStats.stats.weekly_downloads,
+            monthlyDownloads: packageStats.stats.monthly_downloads,
+            latestVersion: packageStats.stats.latest_version,
+            totalVersions: packageStats.stats.total_versions,
+          } : undefined,
+        } : undefined,
+        ecosystemAdoptionScore: ecosystemAdoptionScore !== undefined ? ecosystemAdoptionScore : undefined,
+        summary: summary,
         codebaseAnalysis: codebaseAnalysis && Object.keys(codebaseAnalysis).length > 0 ? {
           codeComplexity: codebaseAnalysis.code_complexity ? {
             averageCyclomaticComplexity: codebaseAnalysis.code_complexity.average_cyclomatic_complexity,

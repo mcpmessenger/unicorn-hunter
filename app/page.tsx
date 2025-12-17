@@ -9,6 +9,7 @@ import { ComponentScores } from "@/components/component-scores"
 import { RepoMetrics } from "@/components/repo-metrics"
 import { InterpretationDisplay } from "@/components/interpretation-display"
 import { CodebaseAnalysis } from "@/components/codebase-analysis"
+import { PackageStats } from "@/components/package-stats"
 import GenerativeMountainScene from "@/components/ui/mountain-scene"
 import { Button } from "@/components/ui/button"
 import { analyzeRepository, type AnalysisResult } from "./actions"
@@ -141,6 +142,14 @@ export default function Home() {
                     scoreMeaning={analysisData.interpretation.scoreMeaning}
                     valuationNote={analysisData.interpretation.valuationNote}
                     factorsConsidered={analysisData.interpretation.factorsConsidered}
+                  />
+                )}
+
+                {/* Package Stats / Ecosystem Adoption */}
+                {analysisData.packageStats && (
+                  <PackageStats
+                    packageStats={analysisData.packageStats}
+                    ecosystemAdoptionScore={analysisData.ecosystemAdoptionScore}
                   />
                 )}
 
