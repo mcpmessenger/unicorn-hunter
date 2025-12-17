@@ -9,7 +9,7 @@ A Next.js application that analyzes GitHub repositories and provides speculative
 ## Overview
 
 Unicorn Hunter analyzes GitHub repositories using codebase metrics (stars, forks, commits, contributors, etc.) to calculate:
-- **Unicorn Score** (0-100) - A speculative score indicating potential for $1B+ valuation
+- **Unicorn Score** (0-100) - A speculative score indicating potential valuation
 - **Valuation Estimates** - Conservative, realistic, and optimistic valuation ranges
 - **Component Scores** - Breakdown by community momentum, development velocity, technology quality, market potential, and network effects
 - **Natural Language Interpretation** - AI-generated explanations of scores and factors
@@ -45,7 +45,7 @@ Unicorn Hunter analyzes GitHub repositories using codebase metrics (stars, forks
   - Architecture and design patterns
   - Documentation quality
 
-**Valuations are capped at $1 billion (unicorn status)** and are purely speculative estimates based on GitHub activity patterns. These should not be considered financial advice.
+**Valuations are purely speculative estimates** based on GitHub activity patterns and codebase analysis. These should not be considered financial advice.
 
 ## Tech Stack
 

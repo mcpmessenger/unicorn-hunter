@@ -57,7 +57,7 @@ export function InterpretationDisplay({
           <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div className="flex-1 space-y-2">
             <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-              <strong>Important:</strong> This analysis is based solely on codebase metrics (stars, forks, commits, contributors, etc.) and does not consider Daily Active Users (DAU), revenue, user engagement, or business metrics. Valuations are capped at $1 billion (unicorn status).
+              <strong>Important:</strong> This analysis is based solely on codebase metrics (stars, forks, commits, contributors, etc.) and does not consider Daily Active Users (DAU), revenue, user engagement, or business metrics. Valuations are speculative estimates and should not be considered financial advice.
             </p>
             {valuationNote && (
               <p className="text-sm text-muted-foreground leading-relaxed">
