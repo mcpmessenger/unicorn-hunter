@@ -57,6 +57,9 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
 
     // Step 1: Analyze the repository to get repo_data
     console.log("[Unicorn Hunter] Step 1: Analyzing repository...")
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+    
     const analyzeResponse = await fetch(`${baseUrl}/mcp/invoke`, {
       method: "POST",
       headers: {
@@ -69,12 +72,18 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
           repo: repo.trim(),
         },
       }),
-    })
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeoutId))
 
     if (!analyzeResponse.ok) {
-      const errorText = await analyzeResponse.text()
+      let errorText = ""
+      try {
+        errorText = await analyzeResponse.text()
+      } catch (e) {
+        errorText = "Unable to read error response"
+      }
       console.error("[Unicorn Hunter] Analyze failed:", errorText)
-      throw new Error(`Failed to analyze repository: ${analyzeResponse.status} - ${errorText}`)
+      throw new Error(`Failed to analyze repository (${analyzeResponse.status}). Please check the repository name and try again.`)
     }
 
     const analyzeData = await analyzeResponse.json()
@@ -101,6 +110,9 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
 
     // Step 2: Get unicorn hunter valuation
     console.log("[Unicorn Hunter] Step 2: Calculating unicorn score...")
+    const controller2 = new AbortController()
+    const timeoutId2 = setTimeout(() => controller2.abort(), 30000) // 30 second timeout
+    
     const unicornResponse = await fetch(`${baseUrl}/mcp/invoke`, {
       method: "POST",
       headers: {
@@ -112,12 +124,18 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
           repo_data: repoData,
         },
       }),
-    })
+      signal: controller2.signal,
+    }).finally(() => clearTimeout(timeoutId2))
 
     if (!unicornResponse.ok) {
-      const errorText = await unicornResponse.text()
+      let errorText = ""
+      try {
+        errorText = await unicornResponse.text()
+      } catch (e) {
+        errorText = "Unable to read error response"
+      }
       console.error("[Unicorn Hunter] Unicorn hunter failed:", errorText)
-      throw new Error(`Failed to calculate unicorn score: ${unicornResponse.status} - ${errorText}`)
+      throw new Error(`Failed to calculate unicorn score (${unicornResponse.status}). Please try again.`)
     }
 
     const unicornData = await unicornResponse.json()
@@ -184,9 +202,26 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
     }
   } catch (error) {
     console.error("[Unicorn Hunter] Failed to analyze repository:", error)
-    throw error instanceof Error
-      ? error
-      : new Error("Failed to analyze repository. Please check the repository name and try again.")
+    
+    // Handle AbortError (timeout)
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Request timed out. Please try again.")
+    }
+    
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new Error("Network error. Please check your connection and try again.")
+    }
+    
+    // Ensure error is serializable for Next.js server actions
+    if (error instanceof Error) {
+      // Create a new error with just the message to ensure serialization
+      const serializableError = new Error(error.message || "An unexpected error occurred")
+      serializableError.name = error.name
+      throw serializableError
+    }
+    
+    throw new Error("Failed to analyze repository. Please check the repository name and try again.")
   }
 }
 
