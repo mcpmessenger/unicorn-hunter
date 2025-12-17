@@ -127,12 +127,23 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       const codebaseAnalysis = unicornHunter.codebase_analysis || agentResult.codebase_analysis || {}
       
       // Component scores are in unicorn_hunter.component_scores
-      const componentScoresObj = unicornHunter.component_scores || {}
-      const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => ({
-        name: name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-        score: typeof score === "number" ? score : 0,
-        weight: 1,
-      }))
+      // Fallback to top-level component_scores if not in unicorn_hunter
+      const componentScoresObj = unicornHunter.component_scores || agentResult.component_scores || {}
+      console.log("[Unicorn Hunter] Component scores found:", Object.keys(componentScoresObj).length, "scores")
+      console.log("[Unicorn Hunter] Component scores:", componentScoresObj)
+      
+      const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => {
+        const formattedName = name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+        const scoreValue = typeof score === "number" ? score : 0
+        console.log(`[Unicorn Hunter] Mapping score: ${name} -> ${formattedName} = ${scoreValue}`)
+        return {
+          name: formattedName,
+          score: scoreValue,
+          weight: 1,
+        }
+      })
+      
+      console.log("[Unicorn Hunter] Final component scores array:", componentScores)
       
       const valuationRanges = unicornHunter.speculative_valuation_ranges || {}
       const interpretation = unicornHunter.interpretation || {}
