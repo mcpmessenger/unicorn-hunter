@@ -25,7 +25,12 @@ export function InterpretationDisplay({
             <Lightbulb className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <h3 className="font-semibold mb-2 text-primary">Score Interpretation</h3>
-              <p className="text-foreground/90 leading-relaxed">{scoreMeaning}</p>
+              <p className="text-foreground/90 leading-relaxed">
+                {scoreMeaning?.replace(/\$1[bB]\+?\s*potential/gi, "exceptional potential") || scoreMeaning}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2 italic">
+                Note: Interpretation text describes potential ranges. See the valuation cards above for actual estimated values.
+              </p>
             </div>
           </div>
         </Card>
