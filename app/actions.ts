@@ -390,11 +390,18 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
     // Convert component_scores object to array
     // The API returns: { "community_momentum": 91.2, "development_velocity": 62.1, ... }
     const componentScoresObj = unicornResult.component_scores || {}
-    const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => ({
-      name: name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()), // Convert snake_case to Title Case
-      score: typeof score === "number" ? score : 0,
-      weight: 1, // Default weight since API doesn't provide it
-    }))
+    console.log("[Unicorn Hunter] Direct API - Component scores object:", Object.keys(componentScoresObj).length, "scores")
+    console.log("[Unicorn Hunter] Direct API - Component scores raw:", JSON.stringify(componentScoresObj, null, 2))
+    const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => {
+      const scoreValue = typeof score === "number" ? score : (typeof score === "string" ? parseFloat(score) || 0 : 0)
+      return {
+        name: name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()), // Convert snake_case to Title Case
+        score: scoreValue,
+        weight: 1, // Default weight since API doesn't provide it
+      }
+    })
+    console.log("[Unicorn Hunter] Direct API - Component scores array length:", componentScores.length)
+    console.log("[Unicorn Hunter] Direct API - Component scores array:", componentScores.map(s => `${s.name}: ${s.score}`).join(", "))
 
     // Extract valuation ranges (they come as numbers, not strings)
     const valuationRanges = unicornResult.speculative_valuation_ranges || {}
