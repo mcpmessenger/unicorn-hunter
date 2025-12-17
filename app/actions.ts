@@ -145,21 +145,38 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       }
       
       // Component scores are in unicorn_hunter.component_scores
-      // Fallback to top-level component_scores if not in unicorn_hunter
-      const componentScoresObj = unicornHunter.component_scores || agentResult.component_scores || {}
+      // Try multiple paths to find component scores
+      let componentScoresObj = {}
+      if (unicornHunter.component_scores) {
+        componentScoresObj = unicornHunter.component_scores
+        console.log("[Unicorn Hunter] Found component_scores in unicorn_hunter.component_scores")
+      } else if (agentResult.component_scores) {
+        componentScoresObj = agentResult.component_scores
+        console.log("[Unicorn Hunter] Found component_scores at top level")
+      } else {
+        console.warn("[Unicorn Hunter] WARNING: No component_scores found anywhere!")
+        console.log("[Unicorn Hunter] Available keys in unicorn_hunter:", Object.keys(unicornHunter))
+        console.log("[Unicorn Hunter] Available keys in agentResult:", Object.keys(agentResult))
+      }
+      
       console.log("[Unicorn Hunter] Component scores found:", Object.keys(componentScoresObj).length, "scores")
-      console.log("[Unicorn Hunter] Component scores raw:", JSON.stringify(componentScoresObj))
+      console.log("[Unicorn Hunter] Component scores raw:", JSON.stringify(componentScoresObj, null, 2))
       
       // Verify we have the codebase analysis scores
       const codebaseScoreKeys = ['code_quality', 'maintainability', 'test_reliability', 'security_posture']
       const foundCodebaseScores = codebaseScoreKeys.filter(key => key in componentScoresObj)
-      console.log("[Unicorn Hunter] Found codebase scores:", foundCodebaseScores)
-      console.log("[Unicorn Hunter] Missing codebase scores:", codebaseScoreKeys.filter(key => !(key in componentScoresObj)))
+      const missingCodebaseScores = codebaseScoreKeys.filter(key => !(key in componentScoresObj))
+      console.log("[Unicorn Hunter] Found codebase scores:", foundCodebaseScores.map(k => `${k}=${componentScoresObj[k]}`))
+      if (missingCodebaseScores.length > 0) {
+        console.warn("[Unicorn Hunter] Missing codebase scores:", missingCodebaseScores)
+      }
       
       const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => {
         const formattedName = name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-        const scoreValue = typeof score === "number" ? score : 0
-        console.log(`[Unicorn Hunter] Mapping score: ${name} -> ${formattedName} = ${scoreValue}`)
+        const scoreValue = typeof score === "number" ? score : (typeof score === "string" ? parseFloat(score) || 0 : 0)
+        if (codebaseScoreKeys.includes(name)) {
+          console.log(`[Unicorn Hunter] CODEBASE SCORE: ${name} -> ${formattedName} = ${scoreValue} (raw: ${score})`)
+        }
         return {
           name: formattedName,
           score: scoreValue,
@@ -167,7 +184,8 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
         }
       })
       
-      console.log("[Unicorn Hunter] Final component scores array:", componentScores)
+      console.log("[Unicorn Hunter] Final component scores array (first 3):", componentScores.slice(0, 3))
+      console.log("[Unicorn Hunter] Total component scores:", componentScores.length)
       
       const valuationRanges = unicornHunter.speculative_valuation_ranges || {}
       const interpretation = unicornHunter.interpretation || {}
