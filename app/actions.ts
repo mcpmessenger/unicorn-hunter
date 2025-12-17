@@ -124,6 +124,13 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
         throw new Error("No data received from agent executor")
       }
 
+      console.log("[Unicorn Hunter] Agent result structure:", {
+        hasAnalysis: !!agentResult.analysis,
+        hasUnicornHunter: !!agentResult.unicorn_hunter,
+        hasCodebaseAnalysis: !!agentResult.codebase_analysis,
+        topLevelKeys: Object.keys(agentResult),
+      })
+
       // Extract data from agent result
       // Agent executor returns: { analysis, codebase_analysis, unicorn_hunter, summary }
       const repoData = agentResult.analysis || agentResult.repo_data || {}
@@ -132,7 +139,10 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       const codebaseAnalysis = unicornHunter.codebase_analysis || agentResult.codebase_analysis || {}
       
       console.log("[Unicorn Hunter] Has unicorn_hunter:", !!agentResult.unicorn_hunter)
-      console.log("[Unicorn Hunter] unicorn_hunter keys:", Object.keys(unicornHunter))
+      if (agentResult.unicorn_hunter) {
+        console.log("[Unicorn Hunter] unicorn_hunter keys:", Object.keys(unicornHunter))
+        console.log("[Unicorn Hunter] Has component_scores:", !!unicornHunter.component_scores)
+      }
       
       // Component scores are in unicorn_hunter.component_scores
       // Fallback to top-level component_scores if not in unicorn_hunter
@@ -142,8 +152,9 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       
       // Verify we have the codebase analysis scores
       const codebaseScoreKeys = ['code_quality', 'maintainability', 'test_reliability', 'security_posture']
-      const hasCodebaseScores = codebaseScoreKeys.some(key => key in componentScoresObj)
-      console.log("[Unicorn Hunter] Has codebase scores:", hasCodebaseScores)
+      const foundCodebaseScores = codebaseScoreKeys.filter(key => key in componentScoresObj)
+      console.log("[Unicorn Hunter] Found codebase scores:", foundCodebaseScores)
+      console.log("[Unicorn Hunter] Missing codebase scores:", codebaseScoreKeys.filter(key => !(key in componentScoresObj)))
       
       const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => {
         const formattedName = name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
