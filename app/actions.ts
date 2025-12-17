@@ -109,7 +109,7 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
         body: JSON.stringify({
           tool: "agent_executor",
           arguments: {
-            input: `what's the unicorn score for ${owner}/${repo} with codebase analysis?`,
+            input: `what's the unicorn score for "${owner}/${repo}" with codebase analysis?`,
           },
         }),
       })
@@ -129,16 +129,15 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
             console.log("[Unicorn Hunter] Agent result keys:", Object.keys(agentResult))
           } catch (e) {
             console.error("[Unicorn Hunter] Failed to parse agent response:", e)
-            throw new Error("Failed to parse analysis data")
+            agentResult = null // Will fall back to direct API method
           }
         }
       }
 
-      if (!agentResult) {
-        throw new Error("No data received from agent executor")
-      }
-
-      console.log("[Unicorn Hunter] Agent result structure:", {
+      // Check if agent_executor failed (e.g., repos with dots like "next.js")
+      if (agentResult && !agentResult.error && agentResult.status !== "failed" && agentResult.unicorn_hunter) {
+        // Agent executor succeeded, process and return
+        console.log("[Unicorn Hunter] Agent result structure:", {
         hasAnalysis: !!agentResult.analysis,
         hasUnicornHunter: !!agentResult.unicorn_hunter,
         hasCodebaseAnalysis: !!agentResult.codebase_analysis,
@@ -274,6 +273,10 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
             commentCoverage: codebaseAnalysis.documentation.comment_coverage,
           } : undefined,
         } : undefined,
+      }
+      } else {
+        // Agent executor failed, fall through to direct API method below
+        console.log("[Unicorn Hunter] Agent executor failed, falling back to direct API calls...")
       }
     }
 
