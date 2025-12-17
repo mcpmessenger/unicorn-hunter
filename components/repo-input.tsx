@@ -8,14 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 interface RepoInputProps {
-  onAnalyze: (repo: string, includeCodebaseAnalysis?: boolean) => void
+  onAnalyze: (repo: string) => void
   isLoading?: boolean
 }
 
 export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
   const [repo, setRepo] = useState("")
   const [error, setError] = useState("")
-  const [includeCodebaseAnalysis, setIncludeCodebaseAnalysis] = useState(true)
 
   const normalizeRepo = (input: string): string | null => {
     const trimmed = input.trim()
@@ -52,7 +51,7 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
       return
     }
 
-    onAnalyze(normalized, includeCodebaseAnalysis)
+    onAnalyze(normalized)
   }
 
   return (
@@ -65,21 +64,9 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
             placeholder="Enter GitHub repo or URL (e.g., facebook/react or https://github.com/facebook/react)"
             value={repo}
             onChange={(e) => setRepo(e.target.value)}
-            className="pl-12 h-14 text-lg bg-background/95 backdrop-blur border-2 focus-visible:ring-primary"
+            className="pl-12 pr-4 h-14 text-lg bg-background/95 backdrop-blur border-2 focus-visible:ring-primary"
             disabled={isLoading}
           />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={includeCodebaseAnalysis}
-                onChange={(e) => setIncludeCodebaseAnalysis(e.target.checked)}
-                disabled={isLoading}
-                className="w-4 h-4 rounded border-primary"
-              />
-              <span className="text-muted-foreground">Deep Analysis (Default)</span>
-            </label>
-          </div>
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" size="lg" className="w-full h-14 text-lg font-semibold" disabled={isLoading}>

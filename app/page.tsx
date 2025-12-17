@@ -20,13 +20,14 @@ export default function Home() {
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handleAnalyze = async (repo: string, includeCodebaseAnalysis: boolean = true) => {
+  const handleAnalyze = async (repo: string) => {
     setIsLoading(true)
     setRepoName(repo)
     setError(null)
 
     try {
-      const result = await analyzeRepository(repo, includeCodebaseAnalysis)
+      // Always use codebase analysis (deep analysis)
+      const result = await analyzeRepository(repo, true)
       setAnalysisData(result)
       setAnalyzed(true)
     } catch (err) {
@@ -78,8 +79,8 @@ export default function Home() {
                   Find the Next <span className="text-primary">Unicorn</span>
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
-                  Get instant valuation estimates and unicorn scores for any GitHub repository. Powered by AI-driven
-                  analysis of stars, activity, and community engagement.
+                  Get instant valuation estimates and unicorn scores for any GitHub repository. Powered by comprehensive
+                  analysis of codebase quality, test coverage, security, architecture, and community engagement.
                 </p>
               </div>
 
