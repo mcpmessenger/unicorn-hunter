@@ -2,7 +2,7 @@
 
 A Next.js application that analyzes GitHub repositories and provides speculative valuation estimates based on codebase metrics. Discover the unicorn potential of any open-source project!
 
-> **Latest Update**: Enhanced with codebase analysis including code quality, test coverage, security, and architecture metrics.
+> **Latest Update**: Backend v1.3.1 - Enhanced mega-repository scoring and improved logarithmic scaling. Codebase analysis including code quality, test coverage, security, and architecture metrics.
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/sentilabs/v0-unicorn-hunter-frontend)
 
