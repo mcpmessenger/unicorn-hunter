@@ -120,21 +120,26 @@ export async function analyzeRepository(repoName: string, includeCodebaseAnalysi
       }
 
       // Extract data from agent result
-      const repoData = agentResult.repo_data || {}
+      // Agent executor returns: { analysis, codebase_analysis, unicorn_hunter, summary }
+      const repoData = agentResult.analysis || agentResult.repo_data || {}
       const metrics = repoData.metrics || {}
-      const codebaseAnalysis = agentResult.codebase_analysis || {}
-      const componentScoresObj = agentResult.component_scores || {}
+      const unicornHunter = agentResult.unicorn_hunter || {}
+      const codebaseAnalysis = unicornHunter.codebase_analysis || agentResult.codebase_analysis || {}
+      
+      // Component scores are in unicorn_hunter.component_scores
+      const componentScoresObj = unicornHunter.component_scores || {}
       const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => ({
         name: name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
         score: typeof score === "number" ? score : 0,
         weight: 1,
       }))
-      const valuationRanges = agentResult.speculative_valuation_ranges || {}
-      const interpretation = agentResult.interpretation || {}
+      
+      const valuationRanges = unicornHunter.speculative_valuation_ranges || {}
+      const interpretation = unicornHunter.interpretation || {}
 
       return {
-        score: agentResult.unicorn_score || 0,
-        status: agentResult.status || getStatusFromScore(agentResult.unicorn_score || 0),
+        score: unicornHunter.unicorn_score || 0,
+        status: unicornHunter.status || getStatusFromScore(unicornHunter.unicorn_score || 0),
         valuations: {
           conservative: formatValuation(valuationRanges.conservative),
           realistic: formatValuation(valuationRanges.realistic),
