@@ -46,7 +46,7 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Enter GitHub repo (e.g., langchain-ai/langchain)"
+            placeholder="Enter GitHub repo (e.g., mcpmessenger/unicorn-hunter)"
             value={repo}
             onChange={(e) => setRepo(e.target.value)}
             className="pl-12 h-14 text-lg bg-background/95 backdrop-blur border-2 focus-visible:ring-primary"
@@ -69,7 +69,7 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
       <div className="mt-6 text-center space-y-2">
         <p className="text-sm text-muted-foreground">Try these examples:</p>
         <div className="flex flex-wrap justify-center gap-2">
-          {["vercel/next.js", "facebook/react", "microsoft/vscode"].map((example) => (
+          {["mcpmessenger/unicorn-hunter", "facebook/react", "langchain-ai/langchain"].map((example) => (
             <button
               key={example}
               onClick={() => setRepo(example)}

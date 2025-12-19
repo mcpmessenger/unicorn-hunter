@@ -99,6 +99,15 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
     const metrics = repoData.metrics || {}
     const unicornHunter = result.unicorn_hunter || {}
     
+    // Log full result structure for debugging
+    console.log("[Unicorn Hunter] Full result structure:", {
+      hasAnalysis: !!result.analysis,
+      hasRepoData: !!result.repo_data,
+      hasUnicornHunter: !!result.unicorn_hunter,
+      unicornHunterKeys: result.unicorn_hunter ? Object.keys(result.unicorn_hunter) : [],
+      topLevelKeys: Object.keys(result),
+    })
+    
     // Component scores are in unicorn_hunter.component_scores
     const componentScoresObj = unicornHunter.component_scores || {}
     const componentScores = Object.entries(componentScoresObj).map(([name, score]: [string, any]) => {
@@ -111,27 +120,59 @@ export async function analyzeRepository(repoName: string): Promise<AnalysisResul
       }
     })
 
-    const valuationRanges = unicornHunter.speculative_valuation_ranges || {}
+    // Try multiple paths for valuation ranges
+    let valuationRanges = unicornHunter.speculative_valuation_ranges || 
+                          unicornHunter.valuation_ranges ||
+                          result.valuation_ranges ||
+                          {}
+    
+    // Log valuation ranges for debugging
+    console.log("[Unicorn Hunter] Valuation ranges found:", JSON.stringify(valuationRanges))
+    console.log("[Unicorn Hunter] Conservative:", valuationRanges.conservative, "Type:", typeof valuationRanges.conservative)
+    console.log("[Unicorn Hunter] Realistic:", valuationRanges.realistic, "Type:", typeof valuationRanges.realistic)
+    console.log("[Unicorn Hunter] Optimistic:", valuationRanges.optimistic, "Type:", typeof valuationRanges.optimistic)
     
     // Helper function to format valuation
     const formatValuation = (value: any): string => {
-      if (value === null || value === undefined) return "$0"
+      if (value === null || value === undefined || value === "") {
+        console.log("[Unicorn Hunter] formatValuation: null/undefined/empty value")
+        return "$0"
+      }
+      
+      // Handle string values
       if (typeof value === "string") {
+        // If it already has $, return as is (might be formatted already)
         if (value.includes("$")) return value
-        const num = parseFloat(value)
-        if (!isNaN(num)) {
+        
+        // Try to parse as number
+        const num = parseFloat(value.replace(/[^0-9.-]/g, ""))
+        if (!isNaN(num) && num > 0) {
+          if (num >= 1000000) {
+            return `$${(num / 1000000).toFixed(1)}M`
+          } else if (num >= 1000) {
+            return `$${(num / 1000).toFixed(1)}K`
+          }
           return `$${Math.round(num).toLocaleString()}`
         }
-        return value
+        // If parsing failed but has content, return as is
+        if (value.trim().length > 0) return value
+        return "$0"
       }
+      
+      // Handle number values
       if (typeof value === "number") {
-        if (value >= 1000000) {
-          return `$${(value / 1000000).toFixed(1)}M`
-        } else if (value >= 1000) {
-          return `$${(value / 1000).toFixed(1)}K`
+        if (value > 0) {
+          if (value >= 1000000) {
+            return `$${(value / 1000000).toFixed(1)}M`
+          } else if (value >= 1000) {
+            return `$${(value / 1000).toFixed(1)}K`
+          }
+          return `$${Math.round(value).toLocaleString()}`
         }
-        return `$${Math.round(value).toLocaleString()}`
+        return "$0"
       }
+      
+      console.log("[Unicorn Hunter] formatValuation: unexpected type", typeof value, value)
       return "$0"
     }
 
