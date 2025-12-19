@@ -16,24 +16,10 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
   const [repo, setRepo] = useState("")
   const [error, setError] = useState("")
 
-  const normalizeRepo = (input: string): string | null => {
-    const trimmed = input.trim()
-    if (!trimmed) return null
-
-    // Handle GitHub URLs
-    const githubUrlRegex = /(?:https?:\/\/)?(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+)(?:\/.*)?$/
-    const urlMatch = trimmed.match(githubUrlRegex)
-    if (urlMatch) {
-      return `${urlMatch[1]}/${urlMatch[2]}`
-    }
-
-    // Handle owner/repo format
+  const validateRepo = (input: string): boolean => {
+    // Simple validation for owner/repo format
     const repoRegex = /^[\w.-]+\/[\w.-]+$/
-    if (repoRegex.test(trimmed)) {
-      return trimmed
-    }
-
-    return null
+    return repoRegex.test(input)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,13 +31,12 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
       return
     }
 
-    const normalized = normalizeRepo(repo)
-    if (!normalized) {
-      setError("Please enter a valid GitHub repository (e.g., facebook/react or https://github.com/facebook/react)")
+    if (!validateRepo(repo)) {
+      setError("Please use owner/repo format (e.g., facebook/react)")
       return
     }
 
-    onAnalyze(normalized)
+    onAnalyze(repo)
   }
 
   return (
@@ -61,10 +46,10 @@ export function RepoInput({ onAnalyze, isLoading }: RepoInputProps) {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Enter GitHub repo or URL (e.g., facebook/react or https://github.com/facebook/react)"
+            placeholder="Enter GitHub repo (e.g., langchain-ai/langchain)"
             value={repo}
             onChange={(e) => setRepo(e.target.value)}
-            className="pl-12 pr-4 h-14 text-lg bg-background/95 backdrop-blur border-2 focus-visible:ring-primary"
+            className="pl-12 h-14 text-lg bg-background/95 backdrop-blur border-2 focus-visible:ring-primary"
             disabled={isLoading}
           />
         </div>
