@@ -1,0 +1,24 @@
+name: Trigger Vercel Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  notify-vercel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Notify Vercel
+        run: |
+          echo "🚀 Changes pushed to GitHub - Vercel will auto-deploy if connected"
+          echo "If Vercel is connected to this repo, deployment should start automatically"
+          echo "Check your Vercel dashboard for deployment status"
