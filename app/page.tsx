@@ -7,9 +7,6 @@ import { ScoreDisplay } from "@/components/score-display"
 import { ValuationCards } from "@/components/valuation-cards"
 import { ComponentScores } from "@/components/component-scores"
 import { RepoMetrics } from "@/components/repo-metrics"
-import { InterpretationDisplay } from "@/components/interpretation-display"
-import { CodebaseAnalysis } from "@/components/codebase-analysis"
-import { PackageStats } from "@/components/package-stats"
 import GenerativeMountainScene from "@/components/ui/mountain-scene"
 import { Button } from "@/components/ui/button"
 import { analyzeRepository, type AnalysisResult } from "./actions"
@@ -27,8 +24,7 @@ export default function Home() {
     setError(null)
 
     try {
-      // Always use codebase analysis (deep analysis)
-      const result = await analyzeRepository(repo, true)
+      const result = await analyzeRepository(repo)
       setAnalysisData(result)
       setAnalyzed(true)
     } catch (err) {
@@ -80,8 +76,8 @@ export default function Home() {
                   Find the Next <span className="text-primary">Unicorn</span>
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
-                  Get instant valuation estimates and unicorn scores for any GitHub repository. Powered by comprehensive
-                  analysis of codebase quality, test coverage, security, architecture, and community engagement.
+                  Get instant valuation estimates and unicorn scores for any GitHub repository. Powered by AI-driven
+                  analysis of stars, activity, and community engagement.
                 </p>
               </div>
 
@@ -135,28 +131,6 @@ export default function Home() {
                   realistic={analysisData.valuations.realistic}
                   optimistic={analysisData.valuations.optimistic}
                 />
-
-                {/* Interpretation / Natural Language */}
-                {analysisData.interpretation && (
-                  <InterpretationDisplay
-                    scoreMeaning={analysisData.interpretation.scoreMeaning}
-                    valuationNote={analysisData.interpretation.valuationNote}
-                    factorsConsidered={analysisData.interpretation.factorsConsidered}
-                  />
-                )}
-
-                {/* Package Stats / Ecosystem Adoption */}
-                {analysisData.packageStats && (
-                  <PackageStats
-                    packageStats={analysisData.packageStats}
-                    ecosystemAdoptionScore={analysisData.ecosystemAdoptionScore}
-                  />
-                )}
-
-                {/* Codebase Analysis */}
-                {analysisData.codebaseAnalysis && (
-                  <CodebaseAnalysis codebaseAnalysis={analysisData.codebaseAnalysis} />
-                )}
 
                 {/* Bottom Grid */}
                 <div className="grid lg:grid-cols-2 gap-8">

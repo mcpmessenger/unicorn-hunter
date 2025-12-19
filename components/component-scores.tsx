@@ -1,6 +1,6 @@
 "use client"
 
-import { Activity, GitFork, Star, Users, Zap, Code, Shield, TestTube, Wrench, FileCode } from "lucide-react"
+import { Activity, GitFork, Star, Users, Zap } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 
@@ -15,32 +15,15 @@ interface ComponentScoresProps {
 }
 
 const getIcon = (name: string) => {
-  const nameLower = name.toLowerCase().replace(/\s+/g, "")
   const icons: Record<string, any> = {
     popularity: Star,
     activity: Activity,
     community: Users,
     engagement: GitFork,
     velocity: Zap,
-    communitymomentum: Star,
-    developmentvelocity: Zap,
-    technologyquality: Code,
-    marketpotential: Star,
-    networkeffects: Users,
-    codequality: Code,
-    maintainability: Wrench,
-    testreliability: TestTube,
-    securityposture: Shield,
   }
-  const Icon = icons[nameLower] || Activity
+  const Icon = icons[name.toLowerCase()] || Activity
   return <Icon className="h-5 w-5" />
-}
-
-const getScoreColor = (score: number) => {
-  if (score >= 80) return "text-green-500"
-  if (score >= 60) return "text-blue-500"
-  if (score >= 40) return "text-yellow-500"
-  return "text-red-500"
 }
 
 export function ComponentScores({ scores }: ComponentScoresProps) {
@@ -58,9 +41,7 @@ export function ComponentScores({ scores }: ComponentScoresProps) {
                   <p className="text-xs text-muted-foreground">Weight: {item.weight}%</p>
                 </div>
               </div>
-              <span className={`text-2xl font-bold ${getScoreColor(item.score)}`}>
-                {item.score.toFixed(1)}
-              </span>
+              <span className="text-2xl font-bold">{item.score}</span>
             </div>
             <Progress value={item.score} className="h-2" />
           </div>

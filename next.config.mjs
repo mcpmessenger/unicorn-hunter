@@ -6,12 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Set workspace root to silence lockfile warning
-  experimental: {
-    turbo: {
-      root: process.cwd(),
-    },
-  },
+ 
 }
 
 export default nextConfig
