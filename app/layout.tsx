@@ -13,14 +13,7 @@ export const metadata: Metadata = {
   description: "Discover your repository's potential with AI-powered valuation and unicorn scores",
   generator: "v0.app",
   icons: {
-    icon: [
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/icon.svg",
-    shortcut: "/icon.svg",
+    icon: "/icon.svg",
   },
 }
 
